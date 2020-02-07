@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">TestTaskApp</string>
+    <string name="authorizeme">авторизоваться через вк</string>
+</resources>
