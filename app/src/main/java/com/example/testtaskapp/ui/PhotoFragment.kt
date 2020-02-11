@@ -10,6 +10,8 @@ import android.location.Location
 import android.os.Bundle
 import android.os.Handler
 import android.view.*
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -20,7 +22,6 @@ import com.example.testtaskapp.R
 import com.example.testtaskapp.ui.viewmodels.PhotoViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import kotlinx.android.synthetic.main.loadingindicator.*
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -52,7 +53,7 @@ class PhotoFragment : Fragment() {
     private fun compressFile(file: File): File {
         val bitmapImage = BitmapFactory.decodeFile(file.path)
         val bos = ByteArrayOutputStream()
-        bitmapImage.compress(Bitmap.CompressFormat.JPEG, 10, bos)
+        bitmapImage.compress(Bitmap.CompressFormat.JPEG, 1, bos)
         val bitMapData: ByteArray = bos.toByteArray()
         val tempFile = File(requireContext().cacheDir.path, "photo.jpg")
         val fos: FileOutputStream?
@@ -177,28 +178,30 @@ class PhotoFragment : Fragment() {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setCancelable(false)
         dialog.setContentView(R.layout.loadingindicator)
-
+        val progress_horizontal = dialog.findViewById(R.id.progress_horizontal) as ProgressBar
+        val value123 = dialog.findViewById<TextView>(R.id.value123)
         Thread(Runnable {
-         while (status <100)
-         {
-             status+=1
-             Thread.sleep(200)
-             handler.post {
-                 progress_horizontal.progress = status
-                 value123.text = status.toString()
-                 if (status == 100) {
-                     dialog.dismiss()
-                 }
-             }
+            while (status < 100) {
+                status += 1
+                Thread.sleep(200)
+                handler.post {
+                    progress_horizontal.progress = status
+                    value123.text = status.toString()
+                    if (status == 100) {
+                        dialog.dismiss()
+                    }
+                }
 
-         }
+            }
         }).start()
 
         dialog.show()
 
         val window = dialog.window
-        window!!.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
-
+        window!!.setLayout(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.WRAP_CONTENT
+        )
 
 
     }
