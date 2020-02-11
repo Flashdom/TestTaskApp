@@ -20,7 +20,7 @@ class AudioViewModel(application: Application) : AndroidViewModel(application) {
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC)
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-        recorder.setOutputFile(getApplication<Application>().applicationContext.cacheDir.absolutePath)
+        recorder.setOutputFile(getApplication<Application>().applicationContext.filesDir.absolutePath + "/file.3gpp")
         recorder.prepare()
         recorder.start()
     }
@@ -29,14 +29,14 @@ class AudioViewModel(application: Application) : AndroidViewModel(application) {
         recorder.stop()
         recorder.release()
         ZipArchive.zip(
-            getApplication<Application>().applicationContext.cacheDir.absolutePath,
-            getApplication<Application>().applicationContext.cacheDir.absolutePath,
+            getApplication<Application>().applicationContext.filesDir.absolutePath + "/file.3gpp",
+            getApplication<Application>().applicationContext.cacheDir.absolutePath + "/fileZip.zip",
             ""
         )
     }
 
 
-    fun uploadDocument(file: File, latitude: Double?, longitude: Double?) : LiveData<ResultModel>{
+    fun uploadDocument(file: File, latitude: Double?, longitude: Double?): LiveData<ResultModel> {
 
         val token: String = getApplication<Application>().applicationContext.getSharedPreferences(
             "Settings",
@@ -47,7 +47,7 @@ class AudioViewModel(application: Application) : AndroidViewModel(application) {
             Context.MODE_PRIVATE
         ).getLong("user_id", 0)
 
-        return repo.uploadAudioDoc(token,file, user_id, latitude, longitude)
+        return repo.uploadAudioDoc(token, file, user_id, latitude, longitude)
 
     }
 

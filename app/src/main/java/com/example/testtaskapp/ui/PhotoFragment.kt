@@ -1,15 +1,15 @@
 package com.example.testtaskapp.ui
 
 import android.Manifest
+import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.location.Location
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.os.Handler
+import android.view.*
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -20,6 +20,7 @@ import com.example.testtaskapp.R
 import com.example.testtaskapp.ui.viewmodels.PhotoViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import kotlinx.android.synthetic.main.loadingindicator.*
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -52,12 +53,12 @@ class PhotoFragment : Fragment() {
         val bitmapImage = BitmapFactory.decodeFile(file.path)
         val bos = ByteArrayOutputStream()
         bitmapImage.compress(Bitmap.CompressFormat.JPEG, 10, bos)
-        val bitmapdata: ByteArray = bos.toByteArray()
+        val bitMapData: ByteArray = bos.toByteArray()
         val tempFile = File(requireContext().cacheDir.path, "photo.jpg")
         val fos: FileOutputStream?
         try {
             fos = FileOutputStream(tempFile)
-            fos.write(bitmapdata)
+            fos.write(bitMapData)
             fos.flush()
             fos.close()
         } catch (e: IOException) {
@@ -86,7 +87,7 @@ class PhotoFragment : Fragment() {
             else {
                 mFusedLocationClient.lastLocation
                     .addOnSuccessListener { location: Location? ->
-
+                        showLoadingIndicator()
                         viewModel.uploadPhoto(file, location!!.latitude, location.longitude)
                             .observe(this) {
                                 if (it.success)
@@ -123,7 +124,7 @@ class PhotoFragment : Fragment() {
             2048 -> {
 
                 if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-
+                    showLoadingIndicator()
                     viewModel.uploadPhoto(file, null, null).observe(this) {
                         if (it.success)
                             parentFragmentManager.beginTransaction().replace(
@@ -143,7 +144,7 @@ class PhotoFragment : Fragment() {
                 } else {
                     mFusedLocationClient.lastLocation
                         .addOnSuccessListener { location: Location? ->
-
+                            showLoadingIndicator()
                             viewModel.uploadPhoto(file, location!!.latitude, location.longitude)
                                 .observe(this) {
                                     if (it.success)
@@ -168,4 +169,41 @@ class PhotoFragment : Fragment() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
+
+    private fun showLoadingIndicator() {
+        var status = 0
+        val handler = Handler()
+        val dialog = Dialog(requireContext())
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setCancelable(false)
+        dialog.setContentView(R.layout.loadingindicator)
+
+        Thread(Runnable {
+         while (status <100)
+         {
+             status+=1
+             Thread.sleep(200)
+             handler.post {
+                 progress_horizontal.progress = status
+                 value123.text = status.toString()
+                 if (status == 100) {
+                     dialog.dismiss()
+                 }
+             }
+
+         }
+        }).start()
+
+        dialog.show()
+
+        val window = dialog.window
+        window!!.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
+
+
+
+    }
+
 }
+
+
+
